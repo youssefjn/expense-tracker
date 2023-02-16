@@ -1,7 +1,9 @@
 package expense.tracker.expensetracker.service;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
 import expense.tracker.expensetracker.dto.ExpenseDto;
 import expense.tracker.expensetracker.error.ExpenseNotFoundException;
 import expense.tracker.expensetracker.mapper.ExpenseMapper;
@@ -17,12 +19,13 @@ public class ExpenseService {
 
     public Long addExpense(ExpenseDto expenseDto) {
         Expense expense = expenseMapper.mapFromDto(expenseDto);
-        return expenseRepository.save(expense).getId();
+        expenseRepository.save(expense);
+        return expenseMapper.mapToDto(expense).getId();
     }
 
     public ExpenseDto getExpenseById(Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new ExpenseNotFoundException("no expense found with id " + expenseId));
+                .orElseThrow(() -> new ExpenseNotFoundException(expenseId.toString()));
         return expenseMapper.mapToDto(expense);
     }
 
@@ -32,18 +35,23 @@ public class ExpenseService {
 
     public void deleteExpense(Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new ExpenseNotFoundException("no expense found with id " + expenseId));
+                .orElseThrow(() -> new ExpenseNotFoundException(expenseId.toString()));
         expenseRepository.delete(expense);
     }
 
     public ExpenseDto updateExpense(Long expenseId, ExpenseDto expenseDto) {
 
         Expense savedExpense = expenseRepository.findById(expenseId).orElseThrow(() -> new ExpenseNotFoundException(
-                String.format("Cannot Find Expense by ID %s", expenseId)));
-        savedExpense.setExpenseName(expenseDto.getExpenseName());
-        savedExpense.setExpenseCategory(expenseDto.getExpenseCategory());
-        savedExpense.setExpenseAmount(expenseDto.getExpenseAmount());
-
+                expenseId.toString()));
+        if (expenseDto.getExpenseName() != null && expenseDto.getExpenseName().length() > 0) {
+            savedExpense.setExpenseName(expenseDto.getExpenseName());
+        }
+        if (expenseDto.getExpenseCategory() != null) {
+            savedExpense.setExpenseCategory(expenseDto.getExpenseCategory());
+        }
+        if (expenseDto.getExpenseAmount() != null) {
+            savedExpense.setExpenseAmount(expenseDto.getExpenseAmount());
+        }
         expenseRepository.save(savedExpense);
         return expenseMapper.mapToDto(savedExpense);
     }
