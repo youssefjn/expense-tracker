@@ -1,10 +1,17 @@
 package expense.tracker.expensetracker.error;
 
-public class ExpenseNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-    public ExpenseNotFoundException(String arg0) {
-        super(arg0);
+import lombok.Getter;
+
+@ResponseStatus(HttpStatus.NOT_FOUND)
+@Getter
+public class ExpenseNotFoundException extends RuntimeException {
+   
+    private String id;
+    public ExpenseNotFoundException(String id) {
+        super(String.format(" expense with id %s is not found ",id));
+        this.id = id;
     }
-    
-    
 }
